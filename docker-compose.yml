@@ -1,0 +1,38 @@
+version: '3.8'
+
+
+services:
+  mongo-db:
+    image: mongo:6.0.6
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: miguel
+      MONGO_INITDB_ROOT_PASSWORD: 123456
+    volumes:
+      - ./mongo:/data/db
+    ports:
+      - 27019:27017
+    networks:
+      - mi-red2
+
+  rest-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: contenedor-restApi
+
+    depends_on:
+      - mongo-db
+    environment:
+      - MONGO_URL=mongodb://miguel:123456@mongo-db:27017
+      - MONGO_DB_NAME=miguel
+      - PORT=8081
+      
+    ports:
+      - "8081:8081"
+    networks:
+      - mi-red2
+networks:
+  mi-red2:
+    driver: bridge

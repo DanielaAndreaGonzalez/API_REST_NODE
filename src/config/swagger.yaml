@@ -1,0 +1,469 @@
+openapi: 3.0.3
+info:
+  title: API de Autenticación y Usuario
+  description: API para manejar autenticación de usuarios y operaciones relacionadas.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Servidor de desarrollo
+paths:
+  /api/auth/login:
+    post:
+      summary: Inicia sesión con un correo electrónico y una contraseña
+      requestBody:
+        description: Credenciales de usuario para iniciar sesión
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Inicio de sesión exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usuario:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                      name:
+                        type: string
+                      role:
+                        type: string
+                  token:
+                    type: string
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+        '401':
+          description: Credenciales incorrectas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+        '500':
+          description: Error en el servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+
+  /api/auth/register:
+    post:
+      summary: Registra un nuevo usuario
+      requestBody:
+        description: Datos del nuevo usuario
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                role:
+                  type: string
+      responses:
+        '200':
+          description: Registro exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usuario:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                      name:
+                        type: string
+                      role:
+                        type: string
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+        '409':
+          description: Usuario ya existe
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+
+  /api/auth/recuperarclave:
+    post:
+      summary: Envía un correo para recuperar la contraseña
+      requestBody:
+        description: Correo electrónico del usuario para recuperar la contraseña
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Correo enviado para recuperación de contraseña
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+
+  /api/auth/reset-password/{token}:
+    post:
+      summary: Cambia la contraseña usando un token de recuperación
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Nueva contraseña del usuario
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newPassword:
+                  type: string
+      responses:
+        '200':
+          description: Contraseña cambiada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+        '400':
+          description: Token inválido o expirado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+
+  /api/usuario:
+    get:
+      summary: Obtiene una lista de usuarios
+      parameters:
+        - in: query
+          name: limite
+          schema:
+            type: integer
+          description: Número de usuarios a retornar
+        - in: query
+          name: desde
+          schema:
+            type: integer
+          description: Número de usuarios a omitir
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  offset:
+                    type: integer
+                  usuarios:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                        name:
+                          type: string
+                        role:
+                          type: string
+        '400':
+          description: Error en la paginación
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+
+    patch:
+      summary: Actualiza parcialmente un usuario
+      requestBody:
+        description: Datos para actualizar parcialmente un usuario
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                role:
+                  type: string
+      responses:
+        '200':
+          description: Usuario actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+        '400':
+          description: Error en la solicitud
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+
+  /api/usuario/{id}:
+    get:
+      summary: Obtiene un usuario por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usuario:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                      name:
+                        type: string
+                      role:
+                        type: string
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+
+    put:
+      summary: Actualiza un usuario por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Datos para actualizar un usuario
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                role:
+                  type: string
+      responses:
+        '200':
+          description: Usuario actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usuario:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                      name:
+                        type: string
+                      role:
+                        type: string
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+
+    delete:
+      summary: Elimina un usuario por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Usuario eliminado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usuario:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                      name:
+                        type: string
+                      role:
+                        type: string
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  mensaje:
+                    type: string
+                  code:
+                    type: integer
